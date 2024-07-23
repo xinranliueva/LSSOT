@@ -59,32 +59,39 @@ class LSSOT(nn.Module):
         self.lcot = LCOT_torch(device=device, refsize=self.ref_size)
         self.seed = seed
 
-    def slice(self, x):
+    def slice(self, x, x_weights, cap=1e-6):
         x = F.normalize(x, p=2, dim=-1)
+        slice_weights = x_weights.repeat(self.num_projections, 1)
+        modified_weights = slice_weights
         n, d = x.shape
         ## Uniform and independent samples on the Stiefel manifold V_{d,2}
         torch.manual_seed(self.seed)
         Z = torch.randn((self.num_projections,d,2), device=self.device)
         U, _ = torch.linalg.qr(Z)
         x = x[None, :, :]@U
+        ignore_ind = torch.norm(x, dim=-1) <= cap
+        modified_weights[ignore_ind] = 0
         x = F.normalize(x, p=2, dim=-1)
-        # Dealing with invalid gradients from atan2 backward function
-        epsilon = 1e-12
-        denominator = -x[:,:,0]
-        near_zeros = torch.abs(denominator) < epsilon
-        denominator = denominator * (near_zeros.logical_not())
-        denominator = denominator + (near_zeros * epsilon)
-        x = (torch.atan2(-x[:,:,1], denominator)+torch.pi)/(2*torch.pi)
-        return x
+        # # Dealing with invalid gradients from atan2 backward function
+        # epsilon = 1e-12
+        # denominator = -x[:,:,0]
+        # near_zeros = torch.abs(denominator) < epsilon
+        # denominator = denominator * (near_zeros.logical_not())
+        # denominator = denominator + (near_zeros * epsilon)
+        x = (torch.atan2(-x[:,:,1], -x[:,:,0])+torch.pi)/(2*torch.pi)
+        # slice_weights = slice_weights / slice_weights.sum(-1).unsqueeze(-1)
+        modified_weights = modified_weights + ((slice_weights-modified_weights).sum(-1) / ignore_ind.logical_not().sum(-1)).unsqueeze(-1)
+        modified_weights[ignore_ind] = 0
+        return x, modified_weights
     
     def embed(self, x, x_weights):
-        x = self.slice(x)
-        return self.lcot.emb(x, x_weights.repeat(self.num_projections, 1))
+        x, w = self.slice(x, x_weights)
+        return self.lcot.emb(x, w)
 
     def forward(self, x1, x1_weights, x2=None, x2_weights=None):
-        x1 = self.slice(x1)
+        x1, x1_w = self.slice(x1, x1_weights)
         if  x2 is not None:
-            x2 = self.slice(x2)
-            return self.lcot.cost(x1, x1_weights.repeat(self.num_projections, 1), x2, x2_weights.repeat(self.num_projections, 1))
-        return self.lcot.cost(x1, x1_weights.repeat(self.num_projections, 1))
+            x2, x2_w = self.slice(x2, x2_weights)
+            return self.lcot.cost(x1, x1_w, x2, x2_w)
+        return self.lcot.cost(x1, x1_w)
     
