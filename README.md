@@ -1,2 +1,2 @@
 # LSSOT
- Linearized spherical sliced optimal transport
+ Linear spherical sliced optimal transport
