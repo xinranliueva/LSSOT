@@ -1,6 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as pl
-import matplotlib.animation as animation
 import torch
 import torch.nn.functional as F
 from lssot import *
@@ -8,9 +6,8 @@ import ot
 from tqdm import tqdm
 import time
 import pickle 
-# The following libraries are from https://github.com/mint-vu/s3wd.git
+# The following library is from https://github.com/mint-vu/s3wd.git
 from s3wd.src.methods.s3wd import ari_s3wd
-from s3wd.src.methods.swd import swd
 
 
 
