@@ -12,5 +12,7 @@ Efficient comparison of spherical probability distributions becomes important in
 
 ### References
 [1] Kate Brody Nooner et al. The nki-rockland sample: a model for accelerating the pace of discovery science in psychiatry. Frontiers in neuroscience, 6:152, 2012.
+
 [2] Clifford R Jack Jr et al. The alzheimer’s disease neuroimaging initiative (adni): Mri methods. Journal of Magnetic Resonance Imaging: An Official Journal of the International Society for Magnetic Resonance in Medicine, 27(4):685–691, 2008.
+
 [3] Fenqiang Zhao et al. S3reg: Superfast spherical surface registration based on deep learning. IEEE Transactions on Medical Imaging, 40(8):1964–1976, 2021. doi: 10.1109/TMI.2021.3069645.
