@@ -1,8 +1,3 @@
----
-title: Linear Spherical Sliced Optimal Transport
-
----
-
 # Linear Spherical Sliced Optimal Transport
 
 ## Abstract
